@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Questionário de Preferências de DSD</title>
+  <title>Distribuição de Serviço Docente do DCSPT</title>
   <style>
     :root {
       --bg: #111315;
@@ -168,6 +168,7 @@
     .score-option {
       position: relative;
       display: inline-block;
+      margin-bottom: 0;
     }
 
     .score {
@@ -269,12 +270,6 @@
       color: white;
     }
 
-    .secondary {
-      background: #1a1d21;
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-
     @media (max-width: 980px) {
       .grid { grid-template-columns: 1fr 1fr; }
       .grid-2 { grid-template-columns: 1fr; }
@@ -301,10 +296,11 @@
 <body>
   <div class="container">
     <header class="hero">
-      <h1>Questionário de Preferências de DSD</h1>
+      <h1>Distribuição de Serviço Docente do DCSPT</h1>
       <p class="lead">
-        Consulta informal para recolher interesse dos colegas docentes relativamente às unidades curriculares.
-        A escala usada é de 1 a 5 (1. Indisponível, 2. ...Como último recurso, 3. Indiferente, 4. Com interesse, 5. Primeira escolha). Seria conveniente não deixar UCs sem resposta.
+        Consulta informal para recolher manifestções de interesse relativamente às unidades curriculares do DCSPT.
+        A escala usada é de 1 a 5 (1. Indisponível, 2. Como último recurso, 3. Indiferente, 4. Com interesse, 5. Primeira escolha).
+        Seria conveniente não deixar UCs sem resposta.
       </p>
     </header>
 
@@ -368,7 +364,6 @@
 
       <div class="actions">
         <button class="primary" id="exportar" type="button">Exportar respostas em CSV</button>
-        <button class="secondary" id="limpar" type="button">Limpar respostas</button>
       </div>
 
       <div class="summary">
@@ -384,12 +379,10 @@
       ["Análise Paisagística", 1, "OB", "", "LAP", "PRU", "1º"],
       ["Delegação, Participação e Escolha Colectiva", 1, "OB", "", "MCP", "CP", "2º"],
       ["Demografia", 1, "OB", "", "LAP", "CS", "1º"],
-      ["Demografia, políticas públicas e epidemiologia env.", "", "", "", "", "", ""],
       ["Direito Constitucional", 1, "OB", "", "LAP", "CJ", "1º"],
       ["Direito de empresas I", 1, "OB", "", "", "CJ", "1º"],
       ["Direito do Trabalho na Administração Pública", 1, "OB", "", "LAP", "CJ", "1º"],
       ["Direitos de Autor e Multimédia", 1, "OB", "", "", "CJ", "1º"],
-      ["Diversidade equidade na inv cientifica (curso n conferente grau)", "", "", "", "", "", ""],
       ["Economia Regional e Urbana", 1, "OB", "", "LAP", "PRU", "1º"],
       ["Estatística e Optimização de Apoio à Decisão", 1, "OB", "", "MCDCS", "M", "2º"],
       ["Estratégias Colaborativas e Política de Cidades", 1, "OB", "", "MPRU", "PRU", "2º"],
@@ -451,7 +444,7 @@
       ["Gestão e Avaliação da Qualidade nos Serviços Publicos", 2, "OB", "", "MAPP", "G", "2º"],
       ["Governação e Políticas Públicas", 2, "OB", "", "LAP", "CP", "1º"],
       ["Governação Local e Políticas Públicas", 2, "Opção", "", "PDPP", "CP", "3º"],
-      ["Governo Local", 2, "OB", "", "", "", "1º"],
+      ["Governo Local", 2, "OB", "", "LGP-ESTGA", "GES", "1º"],
       ["História Pensamento Social e Político", 2, "OB", "", "LAP", "CP", "1º"],
       ["Instituições e Estruturas de Governação Regional e Local", 2, "OB", "", "MCP", "CP", "2º"],
       ["Instituições e Políticas Europeias", 2, "OB", "", "MCP", "CP", "1º"],
@@ -509,11 +502,12 @@
     const area = document.getElementById('area');
     const pesquisa = document.getElementById('pesquisa');
     const exportar = document.getElementById('exportar');
-    const limpar = document.getElementById('limpar');
     const topucs = document.getElementById('topucs');
     const comentarios = document.getElementById('comentarios');
     const nomeInput = document.getElementById('nome');
     const emailInput = document.getElementById('email');
+
+    const respostasGuardadas = {};
 
     const cursos = [...new Set(ucs.map(uc => uc[4]).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt'));
     cursos.forEach(c => {
@@ -541,12 +535,21 @@
     }
 
     function escapeHtml(texto) {
-      return String(texto)
+      return String(texto ?? "")
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+    }
+
+    function obterChaveInternaUC(uc, idxOriginal) {
+      const [nome, sem, tipo, codigo, cursoUc, areaUc, ciclo] = uc;
+      return `uc_${idxOriginal}_${criarIdSeguro(nome)}_${criarIdSeguro(cursoUc)}_${criarIdSeguro(areaUc)}_${criarIdSeguro(String(sem))}_${criarIdSeguro(tipo)}_${criarIdSeguro(ciclo)}`;
+    }
+
+    function obterUcIdCsv(idxOriginal) {
+      return `UC${String(idxOriginal + 1).padStart(3, '0')}`;
     }
 
     function render() {
@@ -555,24 +558,28 @@
       const filtroArea = area.value;
       const termo = pesquisa.value.trim().toLowerCase();
 
-      const filtradas = ucs.filter(([nome, sem, tipo, codigo, cursoUc, areaUc, ciclo]) => {
-        const okSem = filtroSem === 'Todos' || String(sem) === filtroSem;
-        const okCurso = filtroCurso === 'Todos' || cursoUc === filtroCurso;
-        const okArea = filtroArea === 'Todas' || areaUc === filtroArea;
-        const alvo = [nome, sem, tipo, codigo, cursoUc, areaUc, ciclo]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase();
-        const okTexto = !termo || alvo.includes(termo);
-        return okSem && okCurso && okArea && okTexto;
-      });
+      const filtradas = ucs
+        .map((uc, idxOriginal) => ({ uc, idxOriginal }))
+        .filter(({ uc }) => {
+          const [nome, sem, tipo, codigo, cursoUc, areaUc, ciclo] = uc;
+          const okSem = filtroSem === 'Todos' || String(sem) === filtroSem;
+          const okCurso = filtroCurso === 'Todos' || cursoUc === filtroCurso;
+          const okArea = filtroArea === 'Todas' || areaUc === filtroArea;
+          const alvo = [nome, sem, tipo, codigo, cursoUc, areaUc, ciclo]
+            .filter(Boolean)
+            .join(' ')
+            .toLowerCase();
+          const okTexto = !termo || alvo.includes(termo);
+          return okSem && okCurso && okArea && okTexto;
+        });
 
       contador.textContent = `${filtradas.length} de ${ucs.length} UCs visíveis`;
       lista.innerHTML = '';
 
-      filtradas.forEach((uc, idx) => {
+      filtradas.forEach(({ uc, idxOriginal }) => {
         const [nome, sem, tipo, codigo, cursoUc, areaUc, ciclo] = uc;
-        const id = `uc_${idx}_${criarIdSeguro(nome)}`;
+        const chaveInterna = obterChaveInternaUC(uc, idxOriginal);
+        const valorGuardado = respostasGuardadas[chaveInterna];
 
         const tags = [
           sem ? `<span class="tag sem">Sem ${escapeHtml(sem)}</span>` : '',
@@ -594,7 +601,7 @@
           <div class="scores" role="radiogroup" aria-label="Avaliação ${escapeHtml(nome)}">
             ${[1, 2, 3, 4, 5].map(v => `
               <label class="score-option" title="${escapeHtml(escalaTextos[v])}">
-                <input class="score" type="radio" name="${id}" value="${v}">
+                <input class="score" type="radio" name="${escapeHtml(chaveInterna)}" value="${v}" ${Number(valorGuardado) === v ? 'checked' : ''}>
                 <span class="pill" data-value="${v}">${v}</span>
                 <span class="tooltip">${escapeHtml(escalaTextos[v])}</span>
               </label>
@@ -609,18 +616,14 @@
     function recolherDados() {
       const respostas = [];
 
-      document.querySelectorAll('.score:checked').forEach(input => {
-        const nomeInputRadio = input.name;
-        const valor = Number(input.value);
+      ucs.forEach((uc, idxOriginal) => {
+        const chaveInterna = obterChaveInternaUC(uc, idxOriginal);
+        const valor = respostasGuardadas[chaveInterna];
 
-        const entrada = ucs.find((uc, idx) => {
-          const id = `uc_${idx}_${criarIdSeguro(uc[0])}`;
-          return id === nomeInputRadio;
-        });
-
-        if (entrada) {
-          const [nome, sem, tipo, codigo, cursoUc, areaUc, ciclo] = entrada;
+        if (valor !== undefined) {
+          const [nome, sem, tipo, codigo, cursoUc, areaUc, ciclo] = uc;
           respostas.push({
+            uc_id: obterUcIdCsv(idxOriginal),
             nome,
             semestre: sem || "",
             tipo: tipo || "",
@@ -658,6 +661,7 @@
       const header = [
         "nome_docente",
         "email_docente",
+        "uc_id",
         "uc",
         "semestre",
         "tipo",
@@ -682,6 +686,7 @@
         const linha = [
           dados.nome_docente,
           dados.email_docente,
+          r.uc_id,
           r.nome,
           r.semestre,
           r.tipo,
@@ -716,6 +721,12 @@
 
       return base || "respostas";
     }
+
+    lista.addEventListener('change', (e) => {
+      if (e.target.classList.contains('score')) {
+        respostasGuardadas[e.target.name] = Number(e.target.value);
+      }
+    });
 
     exportar.addEventListener('click', () => {
       const dados = recolherDados();
@@ -761,14 +772,6 @@
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
-    });
-
-    limpar.addEventListener('click', () => {
-      document.querySelectorAll('input[type="radio"]').forEach(i => {
-        i.checked = false;
-      });
-      topucs.value = '';
-      comentarios.value = '';
     });
 
     [semestre, curso, area].forEach(el => el.addEventListener('change', render));
