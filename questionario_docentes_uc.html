@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Questionário de Preferências de Lecionação</title>
+  <style>
+    :root {
+      --bg: #111315;
+      --panel: #1a1d21;
+      --border: #343a40;
+      --text: #f3f4f6;
+      --muted: #a7b0ba;
+      --accent: #4f8cff;
+      --accent-2: #6d5efc;
+      --shadow: 0 10px 30px rgba(0,0,0,.28);
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #0e1012 0%, #14181c 100%);
+      color: var(--text);
+    }
+
+    .container {
+      width: min(1180px, calc(100% - 32px));
+      margin: 32px auto 64px;
+    }
+
+    .hero {
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      line-height: 1.1;
+    }
+
+    .lead {
+      margin: 0;
+      color: var(--muted);
+      max-width: 900px;
+      line-height: 1.5;
+    }
+
+    .card {
+      background: rgba(26, 29, 33, .9);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .topbar {
+      padding: 20px;
+      display: grid;
+      gap: 16px;
+      position: sticky;
+      top: 12px;
+      z-index: 10;
+      backdrop-filter: blur(12px);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    label {
+      display: block;
+      font-size: .9rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: #121519;
+      color: var(--text);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font: inherit;
+      outline: none;
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(79, 140, 255, .18);
+    }
+
+    .summary {
+      color: var(--muted);
+      font-size: .95rem;
+    }
+
+    .list {
+      margin-top: 20px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .uc {
+      padding: 18px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .uc:hover {
+      border-color: #49515a;
+      transform: translateY(-1px);
+      transition: .15s ease;
+    }
+
+    .title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag {
+      font-size: .75rem;
+      border-radius: 999px;
+      padding: 4px 10px;
+      border: 1px solid transparent;
+      font-weight: 600;
+      letter-spacing: .02em;
+    }
+
+    .tag.sem   { background: rgba(79, 140, 255, .18); color: #a9c7ff; }
+    .tag.tipo  { background: rgba(34, 197, 94, .16); color: #b7f1c7; }
+    .tag.area  { background: rgba(109, 94, 252, .16); color: #d1caff; }
+    .tag.curso { background: rgba(245, 158, 11, .16); color: #f8d290; }
+    .tag.ciclo { background: rgba(236, 72, 153, .16); color: #f9b4d0; }
+
+    .scores {
+      display: inline-grid;
+      grid-auto-flow: column;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .score-option {
+      position: relative;
+      display: inline-block;
+    }
+
+    .score {
+      appearance: none;
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .pill {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #171a1e;
+      color: #d8dde3;
+      cursor: pointer;
+      user-select: none;
+      font-weight: 700;
+      transition: .15s ease;
+    }
+
+    .pill:hover {
+      border-color: #5f6a75;
+      transform: translateY(-1px);
+    }
+
+    .score:checked + .pill[data-value="1"] { background: rgba(239,68,68,.18); border-color: rgba(239,68,68,.5); color: #ffb2b2; }
+    .score:checked + .pill[data-value="2"] { background: rgba(245,158,11,.18); border-color: rgba(245,158,11,.5); color: #ffd08a; }
+    .score:checked + .pill[data-value="3"] { background: rgba(34,197,94,.18); border-color: rgba(34,197,94,.5); color: #b7f1c7; }
+    .score:checked + .pill[data-value="4"] { background: rgba(79,140,255,.18); border-color: rgba(79,140,255,.5); color: #b9d1ff; }
+    .score:checked + .pill[data-value="5"] { background: rgba(109,94,252,.18); border-color: rgba(109,94,252,.5); color: #d7d1ff; }
+
+    .tooltip {
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% + 10px);
+      transform: translateX(-50%);
+      background: #0f1215;
+      color: #f3f4f6;
+      border: 1px solid #49515a;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: .8rem;
+      line-height: 1.3;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity .15s ease, visibility .15s ease, transform .15s ease;
+      pointer-events: none;
+      z-index: 20;
+      box-shadow: 0 8px 24px rgba(0,0,0,.35);
+    }
+
+    .tooltip::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 6px;
+      border-style: solid;
+      border-color: #49515a transparent transparent transparent;
+    }
+
+    .score-option:hover .tooltip,
+    .score-option:focus-within .tooltip {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(-2px);
+    }
+
+    .footer-card {
+      margin-top: 24px;
+      padding: 20px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+    }
+
+    .secondary {
+      background: #1a1d21;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    @media (max-width: 980px) {
+      .grid { grid-template-columns: 1fr 1fr; }
+      .grid-2 { grid-template-columns: 1fr; }
+      .uc { grid-template-columns: 1fr; }
+      .scores {
+        grid-auto-flow: row;
+        grid-template-columns: repeat(5, auto);
+        justify-content: start;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .container { width: min(100% - 20px, 1000px); }
+      .grid { grid-template-columns: 1fr; }
+      .pill { width: 38px; height: 38px; }
+      .tooltip {
+        white-space: normal;
+        width: 180px;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="hero">
+      <h1>Questionário de Preferências de Lecionação</h1>
+      <p class="lead">
+        Consulta informal para recolher interesse dos colegas docentes relativamente às unidades curriculares.
+        A escala usada é de 1 a 5. Pode deixar UCs sem resposta.
+      </p>
+    </header>
+
+    <section class="card topbar">
+      <div class="grid-2">
+        <div>
+          <label for="nome">Nome</label>
+          <input id="nome" type="text" placeholder="Nome completo" />
+        </div>
+        <div>
+          <label for="email">Email institucional</label>
+          <input id="email" type="email" placeholder="email@instituicao.pt" />
+        </div>
+      </div>
+
+      <div class="grid">
+        <div>
+          <label for="semestre">Filtrar semestre</label>
+          <select id="semestre">
+            <option value="Todos">Todos os semestres</option>
+            <option value="1">Semestre 1</option>
+            <option value="2">Semestre 2</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="curso">Filtrar curso</label>
+          <select id="curso">
+            <option value="Todos">Todos os cursos</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="area">Filtrar área</label>
+          <select id="area">
+            <option value="Todas">Todas as áreas</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="pesquisa">Pesquisar UC</label>
+          <input id="pesquisa" type="text" placeholder="Escreva parte do nome da UC..." />
+        </div>
+      </div>
+
+      <div class="summary" id="contador"></div>
+    </section>
+
+    <main id="lista" class="list"></main>
+
+    <section class="card footer-card">
+      <div>
+        <label for="topucs">UCs de maior interesse (livre, opcional)</label>
+        <textarea id="topucs" rows="4" placeholder="Ex.: indique aqui 3 a 5 UCs de maior interesse, se quiser."></textarea>
+      </div>
+
+      <div>
+        <label for="comentarios">Comentários finais (opcional)</label>
+        <textarea id="comentarios" rows="5" placeholder="Indisponibilidades, observações, sugestões, etc."></textarea>
+      </div>
+
+      <div class="actions">
+        <button class="primary" id="exportar" type="button">Exportar respostas em CSV</button>
+        <button class="secondary" id="limpar" type="button">Limpar respostas</button>
+      </div>
+
+      <div class="summary">
+        Este ficheiro funciona localmente no navegador.
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const ucs = [
+      ["Ambiente, Cidades e Territórios Sustentáveis", 1, "OB", "", "MPRU", "PRU", "2º"],
+      ["Análise de Políticas Públicas", 1, "OB", "", "PDPP", "CP", "3º"],
+      ["Análise Paisagística", 1, "OB", "", "LAP", "PRU", "1º"],
+      ["Delegação, Participação e Escolha Colectiva", 1, "OB", "", "MCP", "CP", "2º"],
+      ["Demografia", 1, "OB", "", "LAP", "CS", "1º"],
+      ["Demografia, políticas públicas e epidemiologia env.", "", "", "", "", "", ""],
+      ["Direito Constitucional", 1, "OB", "", "LAP", "CJ", "1º"],
+      ["Direito de empresas I", 1, "OB", "", "", "CJ", "1º"],
+      ["Direito do Trabalho na Administração Pública", 1, "OB", "", "LAP", "CJ", "1º"],
+      ["Direitos de Autor e Multimédia", 1, "OB", "", "", "CJ", "1º"],
+      ["Diversidade equidade na inv cientifica (curso n conferente grau)", "", "", "", "", "", ""],
+      ["Economia Regional e Urbana", 1, "OB", "", "LAP", "PRU", "1º"],
+      ["Estatística e Optimização de Apoio à Decisão", 1, "OB", "", "MCDCS", "M", "2º"],
+      ["Estratégias Colaborativas e Política de Cidades", 1, "OB", "", "MPRU", "PRU", "2º"],
+      ["Estruturas Organizacionais e Sociais da Saúde", 1, "OB", "", "", "", "2º"],
+      ["Europa e Políticas de População", 1, "Opção", "", "varios", "CS", "2º"],
+      ["Exclusão Social e Políticas Públicas", 1, "OB", "", "LAP", "CS", "1º"],
+      ["Fundamentos de Políticas públicas", 1, "OB", "", "PDPP", "CP", "3º"],
+      ["Governação, Democracia e Globalização", 1, "OB", "", "APP/CP", "CP", "2º"],
+      ["Governo Digital", 1, "Opção", "", "MAPP", "CP", "2º"],
+      ["Infraestruturas e ordenamento do território", 1, "OB", "", "LAP", "PRU", "1º"],
+      ["Instituições e Organizações", 1, "OB", "", "APP/CP", "CS", "2º"],
+      ["Instituições e Partidos Políticos", 1, "OB", "", "MCP", "CP", "2º"],
+      ["Introdução à ciência de dados", 1, "OB", "", "MCDCS", "CS", "2º"],
+      ["Introdução à Ciência Política", 1, "OB", "", "LAP", "CP", "1º"],
+      ["Introdução ao Direito", 1, "OB", "", "LAP", "CJ", "1º"],
+      ["Metodologias de Investigação 1", 1, "OB", "", "PDCP", "CP", "3º"],
+      ["Metodologias de Investigação em Políticas Públicas", 1, "OB", "", "PDPP", "CS", "3º"],
+      ["Métodos e Técnicas de Análise de Dados", 1, "OB", "", "LAP", "CS", "1º"],
+      ["Participação Pública em Planeamento", 1, "Opção", "", "MPRU", "PRU", "2º"],
+      ["Planeamento e Formas Urbanas", 1, "OB", "", "MPRU", "PRU", "2º"],
+      ["Políticas de Habitação e Reabilitação Urbana", 1, "Opção", "", "MPRU", "PRU", "2º"],
+      ["Políticas de Inovação, Ciência e Tecnologia", 1, "OB", "", "MAPP", "CS", "2º"],
+      ["Políticas e Gestão de Segurança Social", 1, "OB", "", "LAP", "CS", "1º"],
+      ["Políticas Públicas de Emprego, Educação e Formação", 1, "OB", "", "MAPP", "CP", "2º"],
+      ["Políticas Públicas e Sistemas de Saúde", 1, "OB", "", "MAPP", "CS", "2º"],
+      ["Políticas Territoriais do Desenvolvimento", 1, "OB", "", "LAP", "PRU", "1º"],
+      ["Projecto de Investigação em Ciência Política 1", 1, "OB", "", "PDCP", "CP", "3º"],
+      ["Regimes e Sistemas Políticos", 1, "OB", "", "LAP", "CP", "1º"],
+      ["Relações Político Culturais", 1, "OB", "", "", "CS", "2º"],
+      ["Seminário de Integração e Orientação", 1, "OB", "", "Varios", "DSN", "2º"],
+      ["Seminário em Políticas Públicas", 1, "OB", "", "PDPP", "CS", "3º"],
+      ["Seminário Integração e Orientação em CP", 1, "OB", "", "MCP", "CP", "2º"],
+      ["Seminário Temático 1", 1, "OB", "", "PDCP", "CP", "3º"],
+      ["Sistemas de Informação Geográfica para Ciências Sociais", 1, "OB", "", "MCDCS", "PRU", "2º"],
+      ["Sociologia das Organizações", 1, "OB", "", "LAP", "CS", "1º"],
+      ["Técnicas de Representação do Espaço", 1, "OB", "", "LAP", "PRU", "1º"],
+      ["Tendências e Modelos de Governação Local", 1, "OB", "", "MAPP", "CS", "2º"],
+      ["Teoria e História da Integração Europeia e Regional", 1, "OB", "", "MCP", "CP", "2º"],
+      ["Teoria Política Contemporânea", 1, "OB", "", "LAP", "CP", "1º"],
+      ["Teoria, Transições e Instrumentos de Planeamento", 1, "OB", "", "MPRU", "PRU", "2º"],
+      ["Território e População", 1, "OB", "", "LAP", "CS", "1º"],
+      ["Tomada de Decisão e Compras Públicas", 1, "OB", "", "MAPP", "CS", "2º"],
+      ["Tópicos Avançados em Gerontologia e Geriatria", 1, "OB", "", "", "GER", "3º"],
+      ["Administração Publica Portuguesa, Fundamentos e Modelos", 2, "OB", "", "LAP", "CS", "1º"],
+      ["Análise Institucional e Organizacional do Ensino Superior", 2, "Opção", "", "PDPP", "CS", "3º"],
+      ["Análise Social e Económica", 2, "OB", "", "LAP", "CS", "1º"],
+      ["Cidadania e pluralismo nas Políticas Sociais", 2, "Opção", "", "MAPP", "CS", "2º"],
+      ["Cidadãos, Preferências e Políticas Públicas", 2, "Opção", "", "PDPP", "CP", "3º"],
+      ["Crescimento, Desenvolvimento e Inovação", 2, "Opção", "", "PDPP", "CS", "3º"],
+      ["Desenvolvimento e Cooperação Internacional", 2, "OB", "", "LAP", "CS", "1º"],
+      ["Desenvolvimento Sustentável e Transições Justas", 2, "Opção", "", "PDPP", "", "3º"],
+      ["Direito de empresas II", 2, "OB", "", "", "CJ", "1º"],
+      ["Direito Económico", 2, "OB", "", "", "CJ", "1º"],
+      ["Direito Público", 2, "OB", "", "LAP", "CJ", "1º"],
+      ["Econometria Temporal e Espacial", 2, "OB", "", "MCDCS", "E", "2º"],
+      ["Espaço Público e Planeamento da Mobilidade", 2, "OB", "", "MPRU", "PRU", "2º"],
+      ["Ética na Administração Pública", 2, "OB", "", "LAP", "CP", "1º"],
+      ["Europeização de sistemas políticos", 2, "OB", "", "MAPP", "CP", "2º"],
+      ["Gestão e Avaliação da Qualidade nos Serviços Publicos", 2, "OB", "", "MAPP", "G", "2º"],
+      ["Governação e Políticas Públicas", 2, "OB", "", "LAP", "CP", "1º"],
+      ["Governação Local e Políticas Públicas", 2, "Opção", "", "PDPP", "CP", "3º"],
+      ["Governo Local", 2, "OB", "", "", "", "1º"],
+      ["História Pensamento Social e Político", 2, "OB", "", "LAP", "CP", "1º"],
+      ["Instituições e Estruturas de Governação Regional e Local", 2, "OB", "", "MCP", "CP", "2º"],
+      ["Instituições e Políticas Europeias", 2, "OB", "", "MCP", "CP", "1º"],
+      ["Introdução às Metodologias em Ciências Sociais", 2, "OB", "", "LAP", "CS", "1º"],
+      ["Laboratório em Planeamento Regional e Urbano", 2, "OB", "", "MPRU", "PRU", "2º"],
+      ["Metodologias de Investigação 2", 2, "OB", "", "PDCP", "CP", "3º"],
+      ["Métodos de Apoio à Decisão em Políticas Públicas", 2, "Opção", "", "PDPP", "CS", "3º"],
+      ["Organização e Gestão das Instituições de Saúde", 2, "OB", "", "MAPP", "CS", "2º"],
+      ["Organização e Prestação de Serviços Públicos", 2, "OB", "", "LAP", "CS", "1º"],
+      ["Planeamento do desenvolvimento Sustentável", 2, "OB", "", "LAP", "PRU", "1º"],
+      ["Planeamento e Projeto Urbano", 2, "OB", "", "LAP", "PRU", "1º"],
+      ["Planeamento Territorial e Urbano", 2, "OB", "", "", "PRU", "1º"],
+      ["Política Fundiária e Execução Urbanística", 2, "OB", "", "MPRU", "PRU", "2º"],
+      ["Políticas de Desenvolvimento Rural", 2, "Opção", "", "PDPP", "CS", "3º"],
+      ["Políticas de Educação Ciência e Tecnologia", 2, "OB", "", "LAP", "CS", "1º"],
+      ["Políticas de Habitação", 2, "Opção", "", "PDPP", "", "3º"],
+      ["Políticas e Gestão de Recursos Humanos", 2, "OB", "", "LAP", "CS", "1º"],
+      ["Políticas e Modelos de Gestão Pública", 2, "OB", "", "PDPP", "CP", "3º"],
+      ["Políticas Públicas de Recursos Humanos", 2, "Opção", "", "MAPP", "CS", "2º"],
+      ["Políticas Públicas e População", 2, "Opção", "", "PDPP", "CS", "3º"],
+      ["Políticas Públicas e Reabilitação Urbana", 2, "Opção", "", "PDPP", "PRU", "3º"],
+      ["Políticas, Organização e Gestão do Ensino Superior", 2, "OB", "", "MAPP", "CS", "2º"],
+      ["Preparação de Projeto Tese", 2, "OB", "", "PDPP", "CS", "3º"],
+      ["Problemas Sociais Contemporâneos", 2, "OB", "", "LAP", "CS", "1º"],
+      ["Projecto de Investigação em Ciência Política 2", 2, "OB", "", "PDCP", "CP", "3º"],
+      ["Propriedade Intelectual e Direitos de Autor", 2, "OB", "", "", "CJ", "2º"],
+      ["Regulação, Análise e Políticas Públicas", 2, "OB", "", "APP/CP", "CP", "2º"],
+      ["Saúde e Políticas Públicas", 2, "Opção", "", "PDPP", "CS", "3º"],
+      ["Seminário", 2, "OB", "", "MCDCS", "CS", "2º"],
+      ["Seminário de Investigação em Ciência Política", 2, "OB", "", "MCP", "CP", "2º"],
+      ["Seminário Temático 2", 2, "OB", "", "PDCP", "CP", "3º"],
+      ["Sistema Político Português em Perspectiva Comparada", 2, "OB", "", "MCP", "CP", "2º"],
+      ["Sistemas de Bases de Dados", 2, "OB", "", "MCDCS", "I", "2º"],
+      ["Sistemas de informação geográfica em ordenamento do território", 2, "OB", "", "LAP", "PRU", "1º"],
+      ["Sistemas e Comportamentos Eleitorais", 2, "OB", "", "LAP", "CP", "1º"],
+      ["Sociologia Política", 2, "OB", "", "LAP", "CS", "1º"],
+      ["Teoria e Política do Planeamanto", 2, "OB", "", "LAP", "PRU", "1º"],
+      ["Território e Apoio à Decisão em Planeamento", 2, "OB", "", "MPRU", "PRU", "2º"],
+      ["Território, Política Pública e Inovação", 2, "OB", "", "MPRU", "PRU", "2º"],
+      ["Turismo Rural e de Natureza", 2, "OB", "", "", "", "2º"]
+    ];
+
+    const escalaTextos = {
+      1: "Indisponível",
+      2: "Disponível apenas no último recurso",
+      3: "Indiferente",
+      4: "Disponível com interesse",
+      5: "É a minha primeira escolha"
+    };
+
+    const lista = document.getElementById('lista');
+    const contador = document.getElementById('contador');
+    const semestre = document.getElementById('semestre');
+    const curso = document.getElementById('curso');
+    const area = document.getElementById('area');
+    const pesquisa = document.getElementById('pesquisa');
+    const exportar = document.getElementById('exportar');
+    const limpar = document.getElementById('limpar');
+    const topucs = document.getElementById('topucs');
+    const comentarios = document.getElementById('comentarios');
+    const nomeInput = document.getElementById('nome');
+    const emailInput = document.getElementById('email');
+
+    const cursos = [...new Set(ucs.map(uc => uc[4]).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt'));
+    cursos.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c;
+      opt.textContent = c;
+      curso.appendChild(opt);
+    });
+
+    const areas = [...new Set(ucs.map(uc => uc[5]).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt'));
+    areas.forEach(a => {
+      const opt = document.createElement('option');
+      opt.value = a;
+      opt.textContent = a;
+      area.appendChild(opt);
+    });
+
+    function criarIdSeguro(texto) {
+      return String(texto || "")
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9]+/g, '_')
+        .replace(/^_+|_+$/g, '')
+        .toLowerCase();
+    }
+
+    function escapeHtml(texto) {
+      return String(texto)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function render() {
+      const filtroSem = semestre.value;
+      const filtroCurso = curso.value;
+      const filtroArea = area.value;
+      const termo = pesquisa.value.trim().toLowerCase();
+
+      const filtradas = ucs.filter(([nome, sem, tipo, codigo, cursoUc, areaUc, ciclo]) => {
+        const okSem = filtroSem === 'Todos' || String(sem) === filtroSem;
+        const okCurso = filtroCurso === 'Todos' || cursoUc === filtroCurso;
+        const okArea = filtroArea === 'Todas' || areaUc === filtroArea;
+        const alvo = [nome, sem, tipo, codigo, cursoUc, areaUc, ciclo]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        const okTexto = !termo || alvo.includes(termo);
+        return okSem && okCurso && okArea && okTexto;
+      });
+
+      contador.textContent = `${filtradas.length} de ${ucs.length} UCs visíveis`;
+      lista.innerHTML = '';
+
+      filtradas.forEach((uc, idx) => {
+        const [nome, sem, tipo, codigo, cursoUc, areaUc, ciclo] = uc;
+        const id = `uc_${idx}_${criarIdSeguro(nome)}`;
+
+        const tags = [
+          sem ? `<span class="tag sem">Sem ${escapeHtml(sem)}</span>` : '',
+          tipo ? `<span class="tag tipo">${escapeHtml(tipo)}</span>` : '',
+          codigo ? `<span class="tag area">Cód. ${escapeHtml(codigo)}</span>` : '',
+          cursoUc ? `<span class="tag curso">${escapeHtml(cursoUc)}</span>` : '',
+          areaUc ? `<span class="tag area">${escapeHtml(areaUc)}</span>` : '',
+          ciclo ? `<span class="tag ciclo">${escapeHtml(ciclo)}</span>` : ''
+        ].filter(Boolean).join('');
+
+        const card = document.createElement('article');
+        card.className = 'card uc';
+
+        card.innerHTML = `
+          <div>
+            <div class="title">${escapeHtml(nome)}</div>
+            <div class="meta">${tags}</div>
+          </div>
+          <div class="scores" role="radiogroup" aria-label="Avaliação ${escapeHtml(nome)}">
+            ${[1, 2, 3, 4, 5].map(v => `
+              <label class="score-option" title="${escapeHtml(escalaTextos[v])}">
+                <input class="score" type="radio" name="${id}" value="${v}">
+                <span class="pill" data-value="${v}">${v}</span>
+                <span class="tooltip">${escapeHtml(escalaTextos[v])}</span>
+              </label>
+            `).join('')}
+          </div>
+        `;
+
+        lista.appendChild(card);
+      });
+    }
+
+    function recolherDados() {
+      const respostas = [];
+
+      document.querySelectorAll('.score:checked').forEach(input => {
+        const nomeInputRadio = input.name;
+        const valor = Number(input.value);
+
+        const entrada = ucs.find((uc, idx) => {
+          const id = `uc_${idx}_${criarIdSeguro(uc[0])}`;
+          return id === nomeInputRadio;
+        });
+
+        if (entrada) {
+          const [nome, sem, tipo, codigo, cursoUc, areaUc, ciclo] = entrada;
+          respostas.push({
+            nome,
+            semestre: sem || "",
+            tipo: tipo || "",
+            codigo: codigo || "",
+            curso: cursoUc || "",
+            area: areaUc || "",
+            ciclo: ciclo || "",
+            valor,
+            significado: escalaTextos[valor]
+          });
+        }
+      });
+
+      return {
+        nome_docente: nomeInput.value.trim(),
+        email_docente: emailInput.value.trim(),
+        top_ucs: topucs.value.trim(),
+        comentarios: comentarios.value.trim(),
+        respostas,
+        exportado_em: new Date().toISOString()
+      };
+    }
+
+    function valorCsv(v) {
+      return `"${String(v ?? "").replace(/"/g, '""')}"`;
+    }
+
+    function converterParaCSV(dados) {
+      const linhas = [];
+      const totalUCs = ucs.length;
+      const respondidas = dados.respostas.length;
+      const percentagem = totalUCs > 0 ? ((respondidas / totalUCs) * 100).toFixed(1) : "0.0";
+      const estado = respondidas === totalUCs ? "COMPLETO" : "INCOMPLETO";
+
+      const header = [
+        "nome_docente",
+        "email_docente",
+        "uc",
+        "semestre",
+        "tipo",
+        "codigo",
+        "curso",
+        "area",
+        "ciclo",
+        "valor",
+        "significado",
+        "top_ucs",
+        "comentarios",
+        "data",
+        "total_ucs",
+        "ucs_respondidas",
+        "percentagem_preenchimento",
+        "estado_preenchimento"
+      ];
+
+      linhas.push(header.join(","));
+
+      dados.respostas.forEach(r => {
+        const linha = [
+          dados.nome_docente,
+          dados.email_docente,
+          r.nome,
+          r.semestre,
+          r.tipo,
+          r.codigo,
+          r.curso,
+          r.area,
+          r.ciclo,
+          r.valor,
+          r.significado,
+          dados.top_ucs,
+          dados.comentarios,
+          dados.exportado_em,
+          totalUCs,
+          respondidas,
+          percentagem,
+          estado
+        ].map(valorCsv);
+
+        linhas.push(linha.join(","));
+      });
+
+      return linhas.join("\n");
+    }
+
+    function nomeFicheiroSeguro(nome) {
+      const base = String(nome || "respostas")
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9]+/g, '_')
+        .replace(/^_+|_+$/g, '')
+        .toLowerCase();
+
+      return base || "respostas";
+    }
+
+    exportar.addEventListener('click', () => {
+      const dados = recolherDados();
+
+      if (!dados.nome_docente) {
+        alert("Indique o seu nome antes de exportar.");
+        nomeInput.focus();
+        return;
+      }
+
+      if (!dados.email_docente) {
+        alert("Indique o seu email institucional antes de exportar.");
+        emailInput.focus();
+        return;
+      }
+
+      if (dados.respostas.length === 0) {
+        alert("Não há respostas para exportar.");
+        return;
+      }
+
+      const totalUCs = ucs.length;
+      const respondidas = dados.respostas.length;
+      const emFalta = totalUCs - respondidas;
+
+      if (emFalta > 0) {
+        const confirmar = confirm(
+          `Ainda há ${emFalta} UCs sem resposta.\n\nQuer exportar mesmo assim?`
+        );
+        if (!confirmar) return;
+      }
+
+      const csv = converterParaCSV(dados);
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+
+      const fileName = `questionario_${nomeFicheiroSeguro(dados.nome_docente)}.csv`;
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    limpar.addEventListener('click', () => {
+      document.querySelectorAll('input[type="radio"]').forEach(i => {
+        i.checked = false;
+      });
+      topucs.value = '';
+      comentarios.value = '';
+    });
+
+    [semestre, curso, area].forEach(el => el.addEventListener('change', render));
+    pesquisa.addEventListener('input', render);
+
+    render();
+  </script>
+</body>
+</html>
